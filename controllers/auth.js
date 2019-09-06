@@ -4,8 +4,6 @@ const repository = require("./../repository/userRepository")
 
 module.exports = {
   createUser(req, res) {
-    console.log("Incoming request: ", req.body)
-
     const { error, value } = userValidator.validate(req.body)
 
     if (error) {
