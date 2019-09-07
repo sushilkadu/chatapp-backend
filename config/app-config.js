@@ -1,3 +1,4 @@
 module.exports = {
-  db_url: "mongodb://localhost/chatapp"
+  db_url: "mongodb://localhost/chatapp",
+  secret: "thisissecret"
 }

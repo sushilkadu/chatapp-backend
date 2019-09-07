@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs")
 const HttpStatus = require("http-status-codes")
 const User = require("./../models/user")
+const jwt = require("jsonwebtoken")
+const appConfig = require("./../config/app-config")
 
 module.exports = {
   saveUser(value, res) {
@@ -21,10 +23,8 @@ module.exports = {
       },
       error => {
         console.log("Error saving user: ", error)
-        if (error.code === 11000) {
-          return res
-            .status(HttpStatus.CONFLICT)
-            .send({ message: "Email already exists" })
+        if (error.errors || error.code === 11000) {
+          return res.status(HttpStatus.CONFLICT).send(error.errors)
         } else {
           return res
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -32,5 +32,51 @@ module.exports = {
         }
       }
     )
+  },
+
+  async loginUser(value, res) {
+    // check if user exists in system
+    User.findOne({ email: value.email })
+      .then(user => {
+        console.log("User: ", user)
+        if (user) {
+          // check if password matches
+          bcrypt
+            .compare(value.password, user.password)
+            .then(result => {
+              // password match
+              if (result) {
+                // create a token
+                const token = jwt.sign(user.toJSON(), appConfig.secret, {
+                  expiresIn: 24 * 60 * 60
+                })
+
+                return res.status(HttpStatus.OK).json({ token: token })
+              } else {
+                return res
+                  .status(HttpStatus.UNAUTHORIZED)
+                  .json({ message: "Password does not match" })
+              }
+            })
+            .catch(error => {
+              console.log("Error occrred during signing token: ", error)
+
+              return res
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .json({ message: "Error occurred: ", error })
+            })
+        } else {
+          return res.status(HttpStatus.NOT_FOUND).json({
+            message: "You are not registered on the platform, please sign up."
+          })
+        }
+      })
+      .catch(error => {
+        console.log("Error occrred: ", error)
+
+        return res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ message: "Error occurred: ", error })
+      })
   }
 }
