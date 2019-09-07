@@ -51,6 +51,7 @@ module.exports = {
                   expiresIn: 24 * 60 * 60
                 })
 
+                res.cookie("auth", token)
                 return res.status(HttpStatus.OK).json({ token: token })
               } else {
                 return res
