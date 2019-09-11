@@ -31,8 +31,10 @@ mongoose.Promise = global.Promise
 mongoose.connect(appConfig.db_url, { useNewUrlParser: true })
 
 const authRoute = require("./routes/authRoutes")
+const postRoute = require("./routes/postRoutes")
 
 app.use("/api", authRoute)
+app.use("/api", postRoute)
 
 app.listen(3000, () => {
   console.log("Server is listening on port 3000")
