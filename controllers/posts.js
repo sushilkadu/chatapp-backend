@@ -1,18 +1,18 @@
-// const postValidator = require("./../validators/userValidator")
+const postValidator = require("./../validators/postValidator")
 const HttpStatus = require("http-status-codes")
 const postRepository = require("./../repository/postRepository")
 
 module.exports = {
   addPost(req, res) {
-    console.log("Inside add post")
+    console.log("Cookie: ", req.cookies)
+    console.log("User: ", req.user)
 
-    postRepository.savePost({}, res)
-    // const { error, value } = userValidator.validateLogin(req.body)
+    const { error, value } = postValidator.validatePost(req.body)
 
-    // if (error) {
-    //   return res.status(HttpStatus.BAD_REQUEST).json({ message: error.details })
-    // }
+    if (error) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: error.details })
+    }
 
-    // userRepository.loginUser(value, res)
+    postRepository.savePost(value, res)
   }
 }

@@ -38,7 +38,6 @@ module.exports = {
     // check if user exists in system
     User.findOne({ email: value.email })
       .then(user => {
-        console.log("User: ", user)
         if (user) {
           // check if password matches
           bcrypt
@@ -47,9 +46,13 @@ module.exports = {
               // password match
               if (result) {
                 // create a token
-                const token = jwt.sign(user.toJSON(), appConfig.secret, {
-                  expiresIn: 24 * 60 * 60
-                })
+                const token = jwt.sign(
+                  { data: user.toJSON() },
+                  appConfig.secret,
+                  {
+                    expiresIn: 1 * 60 * 60
+                  }
+                )
 
                 res.cookie("auth", token)
                 return res.status(HttpStatus.OK).json({ token: token })
